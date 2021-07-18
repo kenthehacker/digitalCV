@@ -2,5 +2,6 @@ We made a crypto trading simulator in this hackaton, allowing users to make an a
 
 Credits: Wesley Yin (back-end & front-end), Kenichi Matsuo (front-end)
 
+link to our repo: https://github.com/wesleyyin/crypto-trading-sim
 
 
