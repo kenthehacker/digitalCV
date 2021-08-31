@@ -2,3 +2,4 @@ Howdie y'all! I'm Kenichi Matsuo and currently am a junior majoring in computer 
 
 Please click on the individual folders to take a peek into my past side projects!
 
+My resume should be above titled "ResumePDF.pdf"
