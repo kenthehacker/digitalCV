@@ -1,0 +1,15 @@
+{
+  "name": "module6_group",
+  "version": "1.0.0",
+  "description": "",
+  "main": "chat-server.js",
+  "dependencies": {
+    "socket.io": "^4.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

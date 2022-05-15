@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Chat Room</title>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+      <script type ="text/javascript">
+
+      var socketio = io.connect();
+      var curr_user = ""; // Keeps track of the current user
+      var currentChatName = ""; // Keeps track of current chat name
+
+      // Preps the site by hiding stuff on load
+      $(document).ready(function() {
+        $("#send").hide();
+        $("#logout").hide();
+        $("#chatBox").hide();
+        $("#makeChat").hide();
+        $("#joinChat").hide();
+      });
+
+      // Displays the users currently in the chat room
+      socketio.on("pushChatInfo", function(data){
+        $("#chatBoxLog").empty();
+        var userList = data["users"];
+        $("#chatBoxLog").prepend("<p>Users in chat: </p>");
+        for (let i = 0; i< userList.length; i++){
+          $("#chatBoxLog").append("<li>"+userList[i]+"</li>");
+        }
+      });
+
+      // Displays the client side messages
+      socketio.on("chatMsgToClient", function(data){
+        $("#chatBoxText").append("<br><br>" + data['message']);
+      });
+
+      // Sends a chat message to the server
+      function sendChatMSG(){
+        var msg = $("#chatInput").val();
+        let user = curr_user;
+
+        // Private messages
+        if (msg.trim().substr(0,3) == "/pm" || msg.trim().substr(0,3) == "/PM") {
+          msg = msg.substr(4);
+          if (msg.split(" ").length - 1 >= 1) { // Greater than one space
+            let tempIndex = msg.indexOf(" ");
+            let otherUser = msg.substr(0, tempIndex);
+            msg = msg.substring(tempIndex + 1);
+            socketio.emit("private_message", {message: msg, username: curr_user, otherUser: otherUser, currentChatName: currentChatName});
+          }
+          else{ alert("Private message in format of: /pm [user] [message]"); }
+        }
+
+        // Kick user
+        else if(msg.trim().substr(0,5) == "/kick") {
+          msg = msg.substr(6);
+          if (msg.split(" ").length - 1 == 0) { // No spaces
+            socketio.emit("kick", {username: curr_user, otherUser: msg, currentChatName: currentChatName});
+          }
+          else{ alert("Kick user in format of: /kick [user]"); }
+        }
+
+        // Ban user
+        else if(msg.trim().substr(0,4) == "/ban") {
+          msg = msg.substr(5);
+          if (msg.split(" ").length - 1 == 0) { // No spaces
+            socketio.emit("ban", {username: curr_user, otherUser: msg, currentChatName: currentChatName});
+          }
+          else{ alert("Ban user in format of: /ban [user]"); }
+        }
+        else{ socketio.emit("chatMsgToServer", {message:msg, username:user, chatName:currentChatName}); }
+        $("#chatInput").val("");
+      }
+
+      // Creates a new chat room
+      function makeNewChat(){
+        $("#chatBoxLog").empty();
+        var newChatName = document.getElementById("newChatName").value;
+        var chatPW = document.getElementById("newChatPassword").value;
+        socketio.emit("makeRoom", {chatName: newChatName,password:chatPW, userName:curr_user, currentChatName: currentChatName});
+        currentChatName = newChatName;
+        $("#login").hide();
+        $("#chatBox").show();
+        $("#chatBoxUserList").remove();
+        socketio.emit("getListOfChatNames");
+      }
+
+      // Requests server to switch chat room user is currently in
+      function switchChat(newChat){
+        var chatPW = document.getElementById("joinPW").value.trim();
+        socketio.emit("joinRoom", {chatName:newChat, userName:curr_user, password:chatPW, currentChatName: currentChatName} );
+      }
+
+      // Displays a list of all open chat rooms
+      socketio.on("returnListOfChatNames", function(data){
+        $("#listOfChats").empty();
+        var chatList = data["chatList"];
+        for (let i = 0; i< chatList.length; i++){
+          var btnID = "BID"+chatList[i]; //button ID
+          $("#listOfChats").append("<li>"+chatList[i]+"</li>");
+          $("#listOfChats").append("<button onclick=\"switchChat(\'"+chatList[i]+"\')\">Go Here</button><br>");
+        }
+      });
+
+      // Updates the client after joining a new chat room
+      socketio.on("newChatInfo", function(data){
+        currentChatName = data.chatName;
+        $("#chatBoxLog").empty();
+        $("#chatBoxText").empty();
+        $("#chatBoxTitle").html("<h2>ChatBox: "+currentChatName+"</h2>");
+      });
+
+      // Client-side code for user who was force-kicked from a room
+      socketio.on("forceKick", function(data){
+        $("#chatBoxTitle").empty();
+        $("#chatBoxLog").empty();
+        $("#chatBoxText").empty();
+        socketio.emit("forceLeave", {chatName: data.currentChatName});
+      });
+
+      // Alerts if wrong room password entered
+      socketio.on("wrongPW", function(data){
+        alert(data.msg);
+      });
+
+      // Runs on login, displays all necessary chat info
+      function login() {
+        let username = $("#username").val();
+        username = username.trim();
+        if (/\s/.test(username)) {
+          // Referenced https://stackoverflow.com/questions/17616624/detect-if-string-contains-any-spaces
+          alert("Username can't have spaces!");
+        } else {
+          $("#send").show();
+          $("#logout").show();
+          $("#login").hide();
+          $("#makeChat").show();
+          $("#joinChat").show();
+          $("#chatBox").show();
+          curr_user = username;
+          socketio.emit("loggedIn", {username: username});
+          socketio.emit("getListOfChatNames");
+        }
+      }
+
+      // Client-side logout code
+      function logout() {
+        let username = $("#username").val();
+        $("#send").hide();
+        $("#logout").hide();
+        $("#login").show();
+        $("#makeChat").hide();
+        $("#joinChat").hide();
+        $("#chatBox").hide();
+        socketio.emit("loggedOut", {username: curr_user, currentChatName: currentChatName});
+      }
+
+      function like(){
+        socketio.emit("sendHeart", {username: curr_user, currentChatName: currentChatName});
+      }
+
+      socketio.on("diddlySquat", function(data){
+        $("#chatBoxText").append("<p>"+data.user+": <img src='data:image/jpeg;base64,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' style='width:50px;'></p>");
+      });
+
+      </script>
+
+      <style>
+        body {
+          font-family: "Verdana" , sans-serif;
+          font-size: 1.5vh;
+        }
+        #login {
+          text-align: center;
+          margin-top: 45vh;
+        }
+        #chatBoxTitle, #chatBoxLog { text-align: center; }
+        #chatBoxLog { margin-bottom: 10vh; }
+        #makeChat { margin-top: 20vh; }
+      </style>
+
+   </head>
+   <body>
+     <div id="login">
+       <input type = "text" id="username" placeholder="Enter your username" />
+       <button onclick="login()">Login</button>
+     </div>
+     <div id="logout">
+       <button onclick="logout()">Logout</button>
+     </div>
+
+     <div id="chatBox">
+       <div id="chatBoxTitle"></div>
+       <div id="chatBoxLog"></div>
+       <h2>Command list</h2>
+       <p>Send a private message: /pm [user] [message]</p>
+       <p>Kick a user as chatroom creator: /kick [user]</p>
+       <p>Ban a user permanently as chatroom creator: /ban [user]</p>
+       <br>
+       <div id="chatBoxText"></div>
+       <br>
+       <input type=text id="chatInput"/>
+       <button onclick="sendChatMSG()">Send</button>
+       <button onclick="like()">Like</button>
+     </div>
+
+     <div id="makeChat">
+       <h2>Make a new chat:</h2>
+       <label for="newChatName">New chat name: </label>
+       <input type=text id="newChatName"/>
+       <label for="newChatPassword">    Enter password or leave blank: </label>
+       <input type=password id="newChatPassword"/>
+       <button onclick="makeNewChat()">Make New Chat</button>
+     </div>
+
+     <br>
+    <div id="joinChat">
+      <h2>Select New Chat:</h2>
+      <label for="joinPW">Enter chat password if required: </label>
+      <input type=password id="joinPW"/>
+      <ul id="listOfChats"></ul>
+    </div>
+   </body>
+</html>
