@@ -2,4 +2,4 @@ This folder contains code from a 3-man team from my school that competed against
 
 The competition was split into three cases: Foreign exchange, options trading, and portfolio optimmization
 
-Credits: Eric Tseng, Kenichi Matsuo (moi), Samuel Saxon
+Credits: Eric Tseng, Kenichi Matsuo (me), Samuel Saxon
