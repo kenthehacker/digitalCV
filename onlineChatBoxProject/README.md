@@ -17,9 +17,3 @@ the same chat. then for each of the users that are in the same chat as the sende
 person already knew the username of the admin, they could enter in the admin username and it'll give them unlimited
 power to kick/ban and join any room without a password if they wish.  The admin username in this case is t00root.
 
-
-## Grading
- - -1: warning in validator
- - -0.5: no .gitignore file
- - -1: communication requires typing different commands
- - -3: admin fails to kick or ban users from room
