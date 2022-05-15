@@ -1,5 +1,2 @@
-Howdie y'all! I'm Kenichi Matsuo and currently am a junior majoring in computer science & planning to minor in mathematics at the Washington University in St. Louis
-
-Please click on the individual folders to take a peek into my past side projects!
-
-My resume should be above titled "ResumePDF.pdf"
+I'm Kenichi Matsuo and a rising senior at Washington University in St. Louis.
+This is a collection of the past projects that I have been working on and some are still a work in progress
