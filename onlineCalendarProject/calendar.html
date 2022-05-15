@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script defer src="cal_functions.min.js"></script>
+    <script defer src="alarm.js"></script>
+    <script defer src="calendar.js"></script>
+    <script defer src="insertEvent.js"></script>
+    <script defer src="eventAdd.js"></script>
+    <script defer src="loginBridge.js"></script>
+    <script defer src="binanceWebsocket.js"></script>
+    <link rel="stylesheet" href="calendar.css">
+  </head>
+  <body>
+    <header></header>
+    <div class="greeting">
+      <p id="crypto"></p>
+    </div>
+    <div class="navContainer">
+      <span class="login">
+        <label for="username">Username:</label>
+        <input type='text' name='username' id='username'>
+        <label for="password">Password:</label>
+        <input type='password' name='password' id='password'>
+        <button type="button" id="submit">Login</button>
+        <button type="button" id="newUserBtn">Register</button>
+      </span>
+      <span id=userInfo></span>
+      <span class="navbar">
+        <button type='button' id='logoutButton'>Logout</button>
+        <button type="button" id="prev">&#60;&#60;&#60;</button>
+        <button type="button" id="today">Today</button>
+        <button type="button" id="next">&#62;&#62;&#62;</button>
+      </span>
+    </div>
+
+    <div class="labels">
+      <div>Sunday</div>
+      <div>Monday</div>
+      <div>Tuesday</div>
+      <div>Wednesday</div>
+      <div>Thursday</div>
+      <div>Friday</div>
+      <div>Saturday</div>
+    </div>
+    <div class="displayMonth"></div>
+    <div class="newEvent">
+      <p>Add a new event</p>
+      <textarea id="newEventText" rows="2" cols="40"></textarea>
+      <div>
+        <input type="time" id="eventTime" min="00:00" max="23:59" required>
+        <input type="date" id="eventDate" min="1000-01-01" max="2999-12-31">
+        <button type="button" id="addEvent">Add event</button>
+      </div>
+      <div class=editDelete>
+        <button type="button" id="deleteEvent">Delete event</button>
+        <button type="button" id="editEvent">Edit event</button>
+        <button type="button" id="shareEvent">Send Event</button>
+        <br>
+        <label for="friendUser">Your Friend's username:</label>
+        <input type='text' name='friendUser' id='friendUser'>
+      </div>
+    </div>
+  </body>
+</html>
