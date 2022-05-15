@@ -29,5 +29,3 @@ kenthehacker OR ericthehacker OR test
 
 otherwise just make a new account
   
-### Grading:
--1.5: Missing filter input. Ex: $userName = $_POST["newUserName"];
