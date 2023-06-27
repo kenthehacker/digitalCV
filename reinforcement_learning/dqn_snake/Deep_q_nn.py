@@ -58,7 +58,7 @@ class CNN_DQN_V3(nn.Module):
         self.flatten = nn.Flatten()
         self.fc1 = nn.Linear(6400, 512)
         self.relu3 = nn.ReLU()
-        self.fc2 = nn.Linear(512, 4)  # Number of output actions. Assuming there are 4 actions: up, down, left, right
+        self.fc2 = nn.Linear(512, 4) 
     def forward(self, x):
         x = self.conv1(x)
         x = self.relu1(x)
