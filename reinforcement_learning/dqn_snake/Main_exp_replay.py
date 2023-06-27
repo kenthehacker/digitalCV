@@ -13,13 +13,13 @@ import os
 
 epsilon_decay_rate = 0.00005
 epsilon_min = 0.02
-epsilon = 1.0
+epsilon = 1
 target_update_rate = 1000
 target_update_episode_rate = 500
 
 discount_rate = 0.85
-model = dqn.CNN_DQN(game.game_size)
-target_model = dqn.CNN_DQN(game.game_size)
+model = dqn.CNN_DQN_V3(game.game_size)
+target_model = dqn.CNN_DQN_V3(game.game_size)
 model_path = "model_parameters_no_discount.pth"
 
 if os.path.exists(model_path):
@@ -44,17 +44,17 @@ def get_cnn_state(snake_body, food):
 #function
 
 def choose_action(state):
-    state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+    #v1 state tensor:
+    #state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+
+    #v2 state tensor:
+    state_tensor = torch.tensor(np.array(state)).unsqueeze(0).unsqueeze(0).float()
     if np.random.rand() <= epsilon:
         return np.random.randint(1,4)
     else:
         #print("CNN RESULT")
         with torch.no_grad():
             q_values = model(state_tensor)
-            #print(q_values)
-            #actions = torch.argmax(q_values, dim=1)
-            #print(actions)
-            #action = actions[0].item()
             action = torch.argmax(q_values)
             return action
 
@@ -92,6 +92,9 @@ def get_reward(snake_body, food, old_location):
         return game.closer_reward
     return game.further_penalty
 
+def decay_epsilon(epsilon, decay_rate, min_epsilon):
+    epsilon = max(1 / (1 + epsilon_decay_rate * episode), epsilon_min)
+    return max(epsilon, min_epsilon)
 
 max_episode = 0
 training = True
@@ -146,6 +149,7 @@ try:
             new_state = get_cnn_state(snake_body, food)
             episode_reward_count += iter_reward
             # Computing loss values:
+
             experience_replay.push(old_state,action,new_state,iter_reward)
             if (len(experience_replay) > experience_replay_batch_size):
                 exp_state,exp_action,exp_reward,exp_next_state = experience_replay.get_batched_state_act_reward_nextState(experience_replay_batch_size)
@@ -155,17 +159,42 @@ try:
                 loss = loss_fn(exp_old_q_value, exp_predicted_q_value)
             else:
                 optimizer.zero_grad()
-                old_state_tensor = torch.tensor(old_state, dtype=torch.float32).unsqueeze(0) #add extra dimension
+                '''
+                #V1 Code:
+                old_state_tensor = torch.tensor(old_state, dtype=torch.float32).unsqueeze(0) 
                 new_state_tensor = torch.tensor(new_state, dtype=torch.float32).unsqueeze(0)
+                '''
+                '''
+                #MLP Code:
+                old_state_tensor = torch.tensor(old_state, dtype=torch.float32).unsqueeze(0) 
+                new_state_tensor = torch.tensor(new_state, dtype=torch.float32).unsqueeze(0)
+                '''
+                #CNN V3:
+                old_state_tensor = torch.tensor(np.array(old_state)).unsqueeze(0).unsqueeze(0).float()
+                new_state_tensor = torch.tensor(np.array(new_state)).unsqueeze(0).unsqueeze(0).float()
+                
+                ##########
+
+                '''
+                #V1 Code:
+                old_q_value = model(old_state_tensor)[action].unsqueeze(0)
+                max_new_q_value = target_model(new_state_tensor).max().item()
+                '''
+                #MLP Code:
+                '''
+                old_q_value = model(old_state_tensor)[0, action].unsqueeze(0)
+                max_new_q_value = target_model(new_state_tensor).max().item()
+                '''
+                #CNN V3:
+                old_q_value = model(old_state_tensor)
+                max_new_q_value = target_model(new_state_tensor).max().item()
+
                 if (episode%1000 == 0):
                     print("EPISODE: "+str(episode)+" ITERATION: "+str(iter))
                     print(model(old_state_tensor))
                     print("EPSILON: "+str(epsilon))
                     print("rewards: "+str(reward_list[-10:]))
-                old_q_value = model(old_state_tensor)[action].unsqueeze(0)
-                #max_new_q_value = model(new_state_tensor).max().item()
-                max_new_q_value = target_model(new_state_tensor).max().item()
-
+                
                 predicted_q_value = torch.tensor([iter_reward + discount_rate * max_new_q_value], device=old_q_value.device)
                 loss = loss_fn(old_q_value, predicted_q_value)
 
@@ -190,7 +219,11 @@ try:
                 break
         if episode%display_rate == 0:
             pygame.quit()
-        epsilon = max(np.exp(-epsilon_decay_rate * episode), epsilon_min)
+        if training:
+            #epsilon = max(np.exp(-epsilon_decay_rate * episode), epsilon_min)
+            epsilon = decay_epsilon(epsilon, epsilon_decay_rate, epsilon_min)
+            if iter % 20 == 0:
+                print("epsilon now: "+ str(epsilon))
         
         reward_list.append(episode_reward_count)
 except KeyboardInterrupt:
@@ -200,7 +233,7 @@ finally:
     torch.save(model.state_dict(), model_path)
 
 
-print("REACHED EPISODE "+str(episode))
+print("REACHED EPISODE "+str(episode)+" EPSILON "+str(epsilon))
 
 sub_reward_list = reward_list[-500:]
 fig, ax = plt.subplots()

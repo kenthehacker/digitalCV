@@ -30,21 +30,66 @@ class CNN_DQN(nn.Module):
 class CNN_DQN_V2(nn.Module):
     def __init__(self,game_dimension):
         super(CNN_DQN_V2, self).__init__()
-        
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.relu = nn.ReLU()
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(32 * 10 * 10, 64)
+        self.fc2 = nn.Linear(64, 4)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.relu(x)
+        x = self.flatten(x)
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return x
+
+class CNN_DQN_V3(nn.Module):
+    def __init__(self, game_dimension):
+        super(CNN_DQN_V3, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.relu1 = nn.ReLU()
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.relu2 = nn.ReLU()
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(6400, 512)
+        self.relu3 = nn.ReLU()
+        self.fc2 = nn.Linear(512, 4)  # Number of output actions. Assuming there are 4 actions: up, down, left, right
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+        #print("Shape after conv1:", x.shape)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        #print("Shape after conv2:", x.shape)
+        x = self.flatten(x)
+        #print("Shape after flatten:", x.shape)
+        x = self.fc1(x)
+        x = self.relu3(x)
+        x = self.fc2(x)
+        return x
 
 
 class MLP_DQN(nn.Module):
     def __init__(self, game_dimension):
         super(MLP_DQN, self).__init__()
-        self.fc1 = nn.Linear(game_dimension*game_dimension, 64)
-        self.fc2 = nn.Linear(64, 128)
-        self.fc3 = nn.Linear(128, 4)  # 4 outputs for the 4 actions
+        self.lay1 = nn.Linear(game_dimension*game_dimension, 128)
+        self.lay2 = nn.Linear(128, 256)
+        self.lay3 = nn.Linear(256,128)
+        self.lay4 = nn.Linear(128,64)
+        self.lay5 = nn.Linear(64, 4)
 
     def forward(self, x):
-        x = x.view(x.size(0), -1)  # flatten the tensor
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.fc3(x)
+        x = x.view(x.size(0), -1)
+        x = F.relu(self.lay1(x))
+        x = F.relu(self.lay2(x))
+        x = F.relu(self.lay3(x))
+        x = F.relu(self.lay4(x))
+        return self.lay5(x)
 
 
 
@@ -76,16 +121,3 @@ class Experiece_Reply:
         return len(self.memory)
 
 
-
-class Linear_DQN(nn.Module):
-    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size):
-        super(Linear_DQN, self).__init__()
-        self.layer1 = nn.Linear(input_size,hidden_1_size)
-        self.layer2 = nn.Linear(hidden_1_size, hidden_2_size)
-        self.layer3 = nn.Linear(hidden_2_size, output_size)
-        
-    def forward(self, input):
-        input = F.relu(self.layer1(input))
-        input = F.relu(self.layer2(input))
-        input = self.layer3(input)
-        return input
