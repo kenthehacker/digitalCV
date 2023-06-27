@@ -1,4 +1,9 @@
 ## Walk through
+This is currently a work in progress. This one week project is taking a bit longer hahahaha
+I'm spending most of my time trying to understand rl which is taking up a chunk of time
+currently I've implemented experience reply and targeted models; so I believe I'm almost done.
+I noticed i made a mistake with how i designed my model which is causing the 
+model to not converge.
 
 
 ## How we represent the state
@@ -17,3 +22,6 @@ What I next experimented with was using "experience replay"
 
 
 https://towardsdatascience.com/deep-q-network-dqn-ii-b6bf911b6b2c
+
+
+https://www.youtube.com/watch?v=KuXjwB4LzSA

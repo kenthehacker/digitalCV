@@ -9,7 +9,7 @@ import random
 
 class CNN_DQN(nn.Module):
     def __init__(self, game_dimension):
-        input_channel = 3
+        input_channel = 1
         output_channel = 1
         super(CNN_DQN, self).__init__()
         self.layer1 = nn.Conv2d(input_channel, output_channel, kernel_size=5, stride=3, padding=1)
@@ -27,7 +27,10 @@ class CNN_DQN(nn.Module):
         x = F.relu(self.layer3(x))
         x = self.layer4(x)
         return x.squeeze()
-
+class CNN_DQN_V2(nn.Module):
+    def __init__(self,game_dimension):
+        super(CNN_DQN_V2, self).__init__()
+        
 
 
 class MLP_DQN(nn.Module):
