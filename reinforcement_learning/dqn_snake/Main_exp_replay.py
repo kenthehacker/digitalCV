@@ -11,11 +11,14 @@ import matplotlib.pyplot as plt
 import Functions as f
 import os
 
-epsilon_decay_rate = 0.00005
+epsilon_decay_rate = 0.99999
 epsilon_min = 0.02
-epsilon = 1
+epsilon = 0.35
+original_epsilon = epsilon
+temp_decay = 2.5*original_epsilon/game.num_episodes
+
 target_update_rate = 1000
-target_update_episode_rate = 500
+target_update_episode_rate = 150
 
 discount_rate = 0.85
 model = dqn.CNN_DQN_V3(game.game_size)
@@ -28,7 +31,7 @@ if os.path.exists(model_path):
     print("Loaded "+model_path)
 
 loss_fn = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
 display_rate = game.display_rate
@@ -59,7 +62,7 @@ def choose_action(state):
             return action
 
 def take_action(action, snake_body, food):
-    if snake_body[-1].get_coord() == food.get_coord():
+    if snake_body[-1].theoretical_action(action) == food.get_coord():#modified this
         new_location = snake_body[-1].theoretical_action(action)
         tail = snake_body[0]
         new_head = Entity.Entity(game.game_size, new_location[0], new_location[1])
@@ -93,7 +96,9 @@ def get_reward(snake_body, food, old_location):
     return game.further_penalty
 
 def decay_epsilon(epsilon, decay_rate, min_epsilon):
-    epsilon = max(1 / (1 + epsilon_decay_rate * episode), epsilon_min)
+    #epsilon = max(1 / (1 + epsilon_decay_rate * curr_episode), epsilon_min)
+    #epsilon = max(epsilon_min, epsilon - temp_decay)
+    epsilon = max(min_epsilon, epsilon * epsilon_decay_rate)
     return max(epsilon, min_epsilon)
 
 max_episode = 0
@@ -235,7 +240,7 @@ finally:
 
 print("REACHED EPISODE "+str(episode)+" EPSILON "+str(epsilon))
 
-sub_reward_list = reward_list[-500:]
+sub_reward_list = reward_list[-250:]
 fig, ax = plt.subplots()
 ax.plot(sub_reward_list)
 plt.tight_layout()
