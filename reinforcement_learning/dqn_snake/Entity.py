@@ -20,6 +20,15 @@ class Entity:
         if choice == 3:
             self.move(0,-1)
             return (0,-1)
+    def update_speed(self, choice):
+        if choice == 0:
+            return (1,0)
+        if choice == 1:
+            return (-1,0)
+        if choice == 2:
+            return (0,1)
+        if choice == 3:
+            return (0,-1)
     def theoretical_action(self,choice):
         if choice == 0:
             return (self.x + 1, self.y)

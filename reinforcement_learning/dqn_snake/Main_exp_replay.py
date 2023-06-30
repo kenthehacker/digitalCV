@@ -20,7 +20,7 @@ temp_decay = 2.5*original_epsilon/game.num_episodes
 target_update_rate = 1000
 target_update_episode_rate = 150
 
-discount_rate = 0.85
+discount_rate = 0.975
 model = dqn.CNN_DQN_V3(game.game_size)
 target_model = dqn.CNN_DQN_V3(game.game_size)
 model_path = "model_parameters_no_discount.pth"
@@ -42,7 +42,9 @@ def get_cnn_state(snake_body, food):
     for body in snake_body:
         if body.is_out_of_bounds() == False:
             grid[body.x][body.y] = 1
-    grid[food.x][food.y] = 2
+    head = snake_body[-1]
+    if head.is_out_of_bounds() == False:
+        grid[head.x][head.y] = 2
     return grid
 #function
 
@@ -133,7 +135,12 @@ try:
             action = choose_action(old_state)
                     
             ate_apple = take_action(action, snake_body, food)
+            
+            if iter%target_update_rate == 0: #target model update 
+                target_model.load_state_dict(model.state_dict())
 
+            iter_reward = get_reward(snake_body, food, old_head_location)
+            
             if ate_apple:
                 food = Entity.Entity(game.game_size, np.random.randint(0,game.game_size),np.random.randint(0,game.game_size))
                 get_new_loc = True
@@ -147,15 +154,12 @@ try:
                     get_new_loc = continue_loop
                 #check for bad replacement
 
-            if iter%target_update_rate == 0: #target model update 
-                target_model.load_state_dict(model.state_dict())
-
-            iter_reward = get_reward(snake_body, food, old_head_location)
             new_state = get_cnn_state(snake_body, food)
             episode_reward_count += iter_reward
             # Computing loss values:
 
             experience_replay.push(old_state,action,new_state,iter_reward)
+            optimizer.zero_grad()
             if (len(experience_replay) > experience_replay_batch_size):
                 exp_state,exp_action,exp_reward,exp_next_state = experience_replay.get_batched_state_act_reward_nextState(experience_replay_batch_size)
                 exp_old_q_value = model(exp_state).gather(1, exp_action.unsqueeze(-1)).squeeze(-1) #.gather() chooses q-values based on actions chosen
@@ -163,7 +167,6 @@ try:
                 exp_predicted_q_value = exp_reward + (discount_rate * exp_max_new_q_value)
                 loss = loss_fn(exp_old_q_value, exp_predicted_q_value)
             else:
-                optimizer.zero_grad()
                 '''
                 #V1 Code:
                 old_state_tensor = torch.tensor(old_state, dtype=torch.float32).unsqueeze(0) 
