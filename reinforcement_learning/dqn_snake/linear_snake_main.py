@@ -20,7 +20,7 @@ However it will introduce higher dimension
 tick_rate = 10
 epsilon_decay_rate = 0.9999999
 epsilon_min = 0.02
-epsilon = 0.40
+epsilon = 0.4
 original_epsilon = epsilon
 temp_decay = 2.5*original_epsilon/game.num_episodes
 input_size = 16
