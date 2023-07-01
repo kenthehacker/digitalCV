@@ -17,7 +17,7 @@ position to the food and any obstacles
 - I have a regular model and a trailing model. The regular model updates with each iteration but the trailing model
 copies the regular model after k-iterations the reason is that we don't want to "chase our own tail," thus I've implemented a replay buffer
 
-'''
+```
 for each episode:
     for each iteration in an episode:
         save old state
@@ -29,7 +29,7 @@ for each episode:
             calculate q values based on trailing nn and update the regular NN
             
             if its k iteration copy params from model into trailing model
-'''
+```
 
 ## Interesting Errors I've hit
 I originally had an issue where the snake's rewards over time on average remained flat even after i trained it for approximately 5
