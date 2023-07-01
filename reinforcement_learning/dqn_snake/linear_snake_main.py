@@ -18,14 +18,14 @@ hence direction is represented as 4 digit binaries
 However it will introduce higher dimension 
 '''
 tick_rate = 10
-epsilon_decay_rate = 0.99999
+epsilon_decay_rate = 0.9999999
 epsilon_min = 0.02
-epsilon = 0.35
+epsilon = 0.40
 original_epsilon = epsilon
 temp_decay = 2.5*original_epsilon/game.num_episodes
 input_size = 16
 game_size = 20 #bigger because less dimensionality compared to cnn 
-def decay_epsilon():
+def decay_epsilon(epsilon, epsilon_min, epsilon_decay_rate):
     epsilon = max(epsilon_min, epsilon * epsilon_decay_rate)
     return max(epsilon, epsilon_min)
 
@@ -78,7 +78,7 @@ def get_state_linear(snake_bodies, food, speed):
 def choose_action(state):
     if np.random.rand() <= epsilon:
         return np.random.randint(1,4)
-    state_tensor = torch.tensor(state,dtype=torch.float64)
+    state_tensor = torch.tensor(state,dtype=torch.float32)
     q_values = model(state_tensor)
     action = torch.argmax(q_values)
     return action
@@ -100,18 +100,18 @@ def take_action(action, snake_bodies, food):
 training = True
 reward_list = []
 max_episode = 0
-clock = pygame.tick.Clock()
+clock = pygame.time.Clock()
 target_update_rate = 100
 try:
-    experience_replay = dqn.Experiece_Reply(10000)
-    experience_replay_batch = 128
+    n_step = 4
+    experience_replay = dqn.Multi_Step_Exp_Replay(10000,n_step,discount_rate)
+    experience_replay_batch_size = 128
+    pygame.init()
+    display = pygame.display.set_mode((game_size * game.pixel_size, game_size * game.pixel_size))
+    display.fill(game.black)
     for episode in range(game.num_episodes):
-        if episode % display_rate == 0:
-            pygame.init()
-            display = pygame.display.set_mode((game_size * game.pixel_size, game_size * game.pixel_size))
-            display.fill(game.black)
         if episode!=0 and episode%target_update_rate == 0:
-            target_model.load_state_dict(model.state_dict)
+            target_model.load_state_dict(model.state_dict())
 
         max_episode = episode
         food = Entity.Entity(game_size, np.random.randint(0,game_size), np.random.randint(0,game_size))
@@ -128,7 +128,7 @@ try:
             action = choose_action(old_state)
             speed = snake_bodies[-1].update_speed(action)
 
-            snake_ate = take_action(action)
+            snake_ate = take_action(action, snake_bodies, food)
             iter_reward = f.get_reward(snake_bodies, food, old_head_location)
             episode_reward += iter_reward
             if snake_ate:
@@ -136,20 +136,20 @@ try:
                 while food.get_coord() in [body.get_coord() for body in snake_bodies]:
                     food = Entity.Entity(game_size, np.random.randint(0,game_size), np.random.randint(0,game_size))
             new_state = get_state_linear(snake_bodies, food, speed)
-        
-            # experience_replay.push(old_state, action, new_state, iter_reward)
+
+            experience_replay.push(old_state, action, new_state, iter_reward)
             optimizer.zero_grad()
-            # if len(experience_replay) > experience_replay_batch:
-            #     pass
-            # else:
-            #     old_state_tensor = torch.tensor(old_state, dtype=torch.float)
-            #     new_state_tensor = torch.tensor(new_state, dtype=torch.float)
-            #im using the wrong replay buffer for multi step learning
-
-
-
-            
-            optimizer.step()
+            if len(experience_replay) > experience_replay_batch_size:
+                states, actions, rewards, next_states = experience_replay.get_batched_state_act_reward_nextState(experience_replay_batch_size)
+                actions = actions.unsqueeze(-1)  # Adds an extra dimension at the end.                
+                target_q_values = rewards + (discount_rate**n_step * target_model(next_states).max(1)[0].detach())
+                current_q_values = model(states).gather(1, actions).squeeze(-1)
+                loss = loss_fn(current_q_values, target_q_values)
+                loss.backward()
+                optimizer.step()
+            #else:
+                #pass 
+                #dont do anything
             #loss.backward()
 
             if episode%display_rate == 0:
@@ -162,12 +162,9 @@ try:
                     clock.tick(5)
                 else:
                     clock.tick(15)
-
+            epsilon = decay_epsilon(epsilon, epsilon_min, epsilon_decay_rate)
             if iter_reward == game.death_penalty:
                 break
-
-        if episode%display_rate == 0:
-            pygame.quit()
         if episode%50 == 0:
             print("Epsilon: "+str(epsilon))
         reward_list.append(episode_reward)
@@ -180,11 +177,13 @@ finally:
 
 print("REACHED EPISODE "+str(max_episode)+" EPSILON "+str(epsilon))
 
+
+
 sub_reward_list = reward_list[-250:]
 fig, ax = plt.subplots()
 ax.plot(sub_reward_list)
 plt.tight_layout()
 plt.show()
 
-
+pygame.quit()
 

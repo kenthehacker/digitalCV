@@ -117,7 +117,7 @@ class MLP_DQN(nn.Module):
         return self.lay5(x)
 
 class Linear_snake(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size):
         super(Linear_snake, self).__init__()
         self.layer1 = nn.Linear(input_size,64)
         self.layer2 = nn.Linear(64,64)
@@ -162,7 +162,37 @@ class Experiece_Reply:
 class Multi_Step_Exp_Replay:
     def __init__(self, capacity, n_step, discount_rate):
         self.capacity = capacity
-        self.n_step = n_step
+        self.memory = []
+        self.n_step_buffer = deque(maxlen=n_step)
         self.discount_rate = discount_rate
-        
+        self.position = 0
 
+    def push(self, state, action, next_state, reward):
+        self.n_step_buffer.append((state, action, reward, next_state))
+        #added support for n-step learning
+        if len(self.n_step_buffer) == self.n_step_buffer.maxlen:
+            state, action, r, next_state = self.n_step_buffer[0]
+            reward = sum(self.discount_rate**i * transition[2] for i, transition in enumerate(self.n_step_buffer))
+            #next_state = self.n_step_buffer[-1][3]
+            self._push(state, action, next_state, reward)
+
+    def _push(self, state, action, next_state, reward):
+        if len(self.memory) < self.capacity:
+            self.memory.append(None)
+        self.memory[self.position] = (state, action, next_state, reward)
+        self.position = (self.position + 1) % self.capacity
+
+    def sample(self, batch_size):
+        return random.sample(self.memory, batch_size)
+
+    def get_batched_state_act_reward_nextState(self, batch_size):
+        data = self.sample(batch_size)
+        state, action, next_state, reward = zip(*data) #transpose our data
+        state = torch.tensor(state, dtype=torch.float)
+        action = torch.tensor(action, dtype=torch.long)
+        reward = torch.tensor(reward, dtype=torch.float)
+        next_state = torch.tensor(next_state, dtype=torch.float)
+        return state, action, reward, next_state
+
+    def __len__(self):
+        return len(self.memory)
