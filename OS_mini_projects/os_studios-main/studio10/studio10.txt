@@ -1,0 +1,144 @@
+1)Kenichi Matsuo
+
+2)
+root@kenpi:/home/kenpi# cat /proc/sys/kernel/sched_autogroup_enabled
+0
+
+
+3)
+top command:
+11340 kenpi     20   0    1884    336    276 R 100.0   0.0   4:41.85 cpu_bound_workl   
+above, we see that the CPU is running at 100%
+
+(check screenshot for HTOP output)
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio10 $ ps -p 11340 -o psr
+PSR
+  1
+
+above shows that its running on CPU #1 when i asked it to run on CPU #1
+
+
+4)
+the pi was acting sluggish when i ran all 4 cores on the program
+
+
+5)
+
+WITH running all 4 cores:
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m3.799s
+user	0m1.852s
+sys	0m0.020s
+
+
+WITHOUT running all 4 cores :
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m1.991s
+user	0m1.965s
+sys	0m0.020s
+
+6)
+Naturally, the real time is significantly greater when running all 4 cores and all 4 cores being occupied
+by some other task. However, the USER time was LESS when running all 4 cores. The value being smaller
+doesn't mean that USER time goes down when running background tasks but that having multiple
+tasks running in the background doesn't affect USER time values. This is because when the process
+is idle or put to sleep, the USER time isn't being incremented. If i increase the number background 
+tasks it shouldn't affect USER time but will increase the REAL time a lot.
+This tells me that the CFS is able to ensure that each process is able to run at the correct preemptively 
+determined time. A CPU bound task will run similar USER times over and over and won't hog CPU time/resources
+
+
+7)
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n -20 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m2.079s
+user	0m1.791s
+sys	0m0.033s
+
+0.8614718614718614
+
+8)
+
+-10: 0.8098464317976513
+
+-5: 0.694560669456067
+
+0:  0.467
+
+5:  0.23632057833728032
+
+10: 0.09211353416179101
+
+19: 0.013388984484989831
+
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n -10 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m2.214s
+user	0m1.793s
+sys	0m0.040s
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n -5 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m2.629s
+user	0m1.826s
+sys	0m0.041s
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n 0 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m4.000s
+user	0m1.868s
+sys	0m0.054s
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n 5 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m8.023s
+user	0m1.896s
+sys	0m0.045s
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n 10 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m20.681s
+user	0m1.905s
+sys	0m0.026s
+
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time sudo nice -n 19 ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	2m20.638s
+user	0m1.883s
+sys	0m0.055s
+
+9)
+
+kenpi@kenpi:~/Desktop/studios/os_studios/test_programs $ time ./dense_mm 300
+Generating matrices...
+Multiplying matrices...
+Multiplication done!
+
+real	0m5.476s
+user	0m1.804s
+sys	0m0.021s
+

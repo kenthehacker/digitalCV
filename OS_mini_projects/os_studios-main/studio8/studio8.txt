@@ -1,0 +1,126 @@
+1) Kenichi Matsuo
+
+2)
+static struct task_struct *k_threads[4];
+
+int ret_zero(void * payload){
+    while(!kthread_should_stop()){
+        //do nothing
+    }
+    return 0;
+}
+
+static int thread_init(void){
+	int i;
+    printk(KERN_ALERT "k thread module loaded \n");
+    k_threads[0] = kthread_create(ret_zero, NULL, "a");
+    k_threads[1] = kthread_create(ret_zero, NULL, "b");
+    k_threads[2] = kthread_create(ret_zero, NULL, "c");
+    k_threads[3] = kthread_create(ret_zero, NULL, "d");
+
+    for(i = 0; i<4; i++){
+        kthread_bind(k_threads[i], i);
+        wake_up_process(k_threads[i]);
+    }
+    return 0;
+}
+
+static void thread_exit(void){
+	int i;
+    printk(KERN_ALERT "k thread module offloaded \n");
+
+    for(i = 0; i<4; i++){
+        kthread_stop(k_threads[i]);
+    }
+
+}
+
+3)
+if there are no data races, i.e. if we assume that thread i finishes before thread i+1 starts,
+then each thread should add 1 million to the variable. as there are 4 threads it should increment to 4 mil
+
+because there exists a data race, all 4 threads might read and write concurrently, meanining one thread's
+updates would be erased by another thread's reading of an old value of the variable
+
+4)
+print outs:
+[484728.117351] k thread module loaded 
+[484733.168765] k thread module offloaded 
+[484733.169116] shared_data was 1849540 
+[484764.700728] k thread module loaded 
+[484774.291516] k thread module offloaded 
+[484774.291871] shared_data was 1243696 
+[484779.957285] k thread module loaded 
+[484792.854121] k thread module offloaded 
+[484792.873299] shared_data was 2021328 
+
+clearly we can see that our value is nowhere close to 4mil and 
+the values are inconsistent.
+
+5)
+static struct task_struct *k_threads[4];
+atomic_t shared_data;
+
+
+int ret_zero(void * payload){
+    int i;
+	for(i = 0; i<iters; i++){
+		atomic_add(1,&shared_data);
+	}
+    while(!kthread_should_stop()){
+    	//do nothing
+	}
+    return 0;
+}
+
+static int thread_init(void){
+	int i;
+    printk(KERN_ALERT "k thread module loaded \n");
+    atomic_set(&shared_data,0);
+
+    k_threads[0] = kthread_create(ret_zero, NULL, "a");
+    k_threads[1] = kthread_create(ret_zero, NULL, "b");
+    k_threads[2] = kthread_create(ret_zero, NULL, "c");
+    k_threads[3] = kthread_create(ret_zero, NULL, "d");
+
+    for(i = 0; i<4; i++){
+        kthread_bind(k_threads[i], i);
+        wake_up_process(k_threads[i]);
+    }
+    return 0;
+}
+
+static void thread_exit(void){
+	int i;
+    printk(KERN_ALERT "k thread module offloaded \n");
+
+    for(i = 0; i<4; i++){
+        kthread_stop(k_threads[i]);
+    }
+    printk(KERN_ALERT "shared_data was %d \n", atomic_read(&shared_data));
+
+}
+
+
+
+6)
+[486279.012888] k thread module loaded 
+[486288.190966] k thread module offloaded 
+[486288.202160] shared_data was 4000000 
+
+7)
+[486488.653264] k thread module loaded 
+[486488.654151] starting forloop
+[486488.654168] starting forloop
+[486488.655515] starting forloop
+[486488.657429] starting forloop
+[486488.902917] ending loop
+[486489.036928] ending loop
+[486489.045760] ending loop
+[486489.088860] ending loop
+[486498.247303] k thread module offloaded 
+[486498.257559] shared_data was 4000000 
+
+it took about .25 seconds
+
+

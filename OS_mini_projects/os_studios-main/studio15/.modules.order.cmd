@@ -1,0 +1,1 @@
+cmd_/project/scratch01/compile/ken.m/user_space/os_studios/studio15/modules.order := {   echo /project/scratch01/compile/ken.m/user_space/os_studios/studio15/stud15_kmod.ko; :; } | awk '!x[$$0]++' - > /project/scratch01/compile/ken.m/user_space/os_studios/studio15/modules.order

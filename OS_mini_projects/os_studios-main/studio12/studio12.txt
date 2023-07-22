@@ -1,0 +1,97 @@
+1. Kenichi Matsuo
+
+2.
+[339973.628321] Hello from thread k_memory. nr_structs=2000
+[339973.628340] kernel page size 4096 bytes 
+[339973.628357] datatype struct is 32 bytes 
+[339973.628373] 128 fits in a page
+[339989.326167] Unloaded kernel_memory module
+
+3.
+nr_structs = 2000
+[  114.574259] kernel_memory: loading out-of-tree module taints kernel.
+[  114.574892] Loaded kernel_memory module
+[  114.576190] Hello from thread k_memory. nr_structs=2000
+[  114.576211] kernel page size 4096 bytes 
+[  114.576226] datatype struct is 32 bytes 
+[  114.576241] 128 fits in a page
+[  114.576256] found we need 16 pages
+[  114.576271] order is 4 
+[  114.576292] alloced pages 
+[  114.576306] SUCCESS: pages made
+[  114.576322] nr_struct_per_page: 128 nr_pages: 16 order: 4 
+[  140.403432] Unloaded kernel_memory module
+
+
+nr_structs = 1000
+[  208.734107] Hello from thread k_memory. nr_structs=1000
+[  208.734126] kernel page size 4096 bytes 
+[  208.734141] datatype struct is 32 bytes 
+[  208.734156] 128 fits in a page
+[  208.734171] found we need 8 pages
+[  208.734186] order is 3 
+[  208.734207] alloced pages 
+[  208.734221] SUCCESS: pages made
+[  208.734236] nr_struct_per_page: 128 nr_pages: 8 order: 3 
+[  216.975094] Unloaded kernel_memory module
+
+
+nr_structs = 4000
+[  244.637289] Loaded kernel_memory module
+[  244.638834] Hello from thread k_memory. nr_structs=4000
+[  244.638854] kernel page size 4096 bytes 
+[  244.638870] datatype struct is 32 bytes 
+[  244.638885] 128 fits in a page
+[  244.638900] found we need 32 pages
+[  244.638915] order is 5 
+[  244.638937] alloced pages 
+[  244.638951] SUCCESS: pages made
+[  244.638968] nr_struct_per_page: 128 nr_pages: 32 order: 5 
+[  250.162271] Unloaded kernel_memory module
+
+my_get_order essentially takes the log base 2 of the input value.
+it does this by checking first if value is a power of 2
+then it bit shifts to the right until value is zeroed, the number
+of shifts is how many times we can divide value by 2, which is 
+equivalent to taking log_2(value)
+
+
+4.
+[ 2467.068990] Loaded kernel_memory module
+[ 2467.069286] Hello from thread k_memory. nr_structs=200
+[ 2467.069305] kernel page size 4096 bytes 
+[ 2467.069321] datatype struct is 32 bytes 
+[ 2467.069337] 128 fits in a page
+[ 2467.069359] nr_struct_per_page: 128 nr_pages: 2 order: 1 
+[ 2467.069374] at j=0 and k&j=0 0
+[ 2467.069402] at j=0 and k&j=0 1024
+[ 2486.145363] Unloaded kernel_memory module
+
+
+5.
+default nr_struct
+[ 2264.906258] Loaded kernel_memory module
+[ 2267.510032] nr_struct_per_page: 128 nr_pages: 16 order: 4 
+[ 2267.510050] SUCCESS
+[ 2267.510134] Unloaded kernel_memory module
+
+nr_structs=1000
+[ 2320.134113] Unloaded kernel_memory module
+[ 2329.790774] Loaded kernel_memory module
+[ 2332.891205] nr_struct_per_page: 128 nr_pages: 8 order: 3 
+[ 2332.891225] SUCCESS
+[ 2332.891311] Unloaded kernel_memory module
+
+nr_structs=10000
+[ 2362.787433] Loaded kernel_memory module
+[ 2365.340242] nr_struct_per_page: 128 nr_pages: 79 order: 7 
+[ 2365.340261] SUCCESS
+[ 2365.340346] Unloaded kernel_memory module
+
+nr_structs=50000
+[ 2392.880278] Loaded kernel_memory module
+[ 2396.359310] nr_struct_per_page: 128 nr_pages: 391 order: 9 
+[ 2396.359330] SUCCESS
+[ 2396.359435] Unloaded kernel_memory module
+
+

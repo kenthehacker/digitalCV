@@ -1,0 +1,114 @@
+1. Kenichi Matsuo
+
+2.
+[1289637.998040] LOADED studio 15 module 
+[1289638.002477] fs: 1f64198c files: a2c90596 nsproxy: 29894748 
+[1289643.542036] UNLOADED studio 15 module 
+
+3.
+[1335699.276195] LOADED studio 15 module 
+[1335699.276499] fs: 1f64198c files: a2c90596 nsproxy: 29894748 
+[1335699.276520] pwd dentry: 8c5a4479 | root dentry: 8c5a4479 
+[1335699.276537] pwd and root not the same pwd: / | root: / 
+[1335711.295818] UNLOADED studio 15 module 
+
+the two dentry points to the same exact location but we actually have
+two seperate dentry structs for the pwd and root; we need this 
+in order to keep track of the root which would be useful for traversing
+the VFS
+
+
+
+4.
+[1342930.916592] LOADED studio 15 module 
+[1342930.918099] fs: 1f64198c files: a2c90596 nsproxy: 29894748 
+[1342930.918121] pwd dentry: 8c5a4479 | root dentry: 8c5a4479 
+[1342930.918138] pwd and root not the same pwd: / | root: / 
+[1342930.918154] media
+[1342930.918169] mnt
+[1342930.918184] srv
+[1342930.918199] opt
+[1342930.918214] sbin
+[1342930.918229] lost+found
+[1342930.918244] selinux
+[1342930.918259] lib
+[1342930.918274] bin
+[1342930.918289] root
+[1342930.918303] tmp
+[1342930.918318] home
+[1342930.918333] boot
+[1342930.918348] var
+[1342930.918362] run
+[1342930.918376] sys
+[1342930.918391] proc
+[1342930.918405] etc
+[1342930.918420] usr
+[1342930.918434] dev
+[1342935.231137] UNLOADED studio 15 module 
+
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio15 $ ls -l /
+total 61
+lrwxrwxrwx   1 root root     7 Jan 27  2022 bin -> usr/bin
+drwxr-xr-x   4 root root  5120 Dec 31  1969 boot
+drwxr-xr-x  16 root root  3760 Mar 16 16:30 dev
+drwxr-xr-x 117 root root  4096 Feb  7 11:12 etc
+drwxr-xr-x   3 root root  4096 Jan 27  2022 home
+lrwxrwxrwx   1 root root     7 Jan 27  2022 lib -> usr/lib
+drwx------   2 root root 16384 Jan 27  2022 lost+found
+drwxr-xr-x   2 root root  4096 Jan 27  2022 media
+drwxr-xr-x   2 root root  4096 Jan 27  2022 mnt
+drwxr-xr-x   4 root root  4096 Jan 27  2022 opt
+dr-xr-xr-x 179 root root     0 Dec 31  1969 proc
+drwx------   5 root root  4096 Feb 24 15:41 root
+drwxr-xr-x  29 root root   840 Mar 23 10:41 run
+lrwxrwxrwx   1 root root     8 Jan 27  2022 sbin -> usr/sbin
+drwxr-xr-x   2 root root  4096 Jan 27  2022 srv
+dr-xr-xr-x  12 root root     0 Dec 31  1969 sys
+drwxrwxrwt   9 root root  4096 Mar 23 10:50 tmp
+drwxr-xr-x  11 root root  4096 Jan 27  2022 usr
+drwxr-xr-x  11 root root  4096 Jan 27  2022 var
+
+
+this sort of differs for example in my code i have selinux 
+
+
+
+5.
+[1343622.288507] LOADED studio 15 module 
+[1343622.288802] fs: 1f64198c files: a2c90596 nsproxy: 29894748 
+[1343622.288822] pwd dentry: 8c5a4479 | root dentry: 8c5a4479 
+[1343622.288840] pwd and root not the same pwd: / | root: / 
+[1343622.288855] printing curr dir items 
+[1343622.288873] root
+[1343622.288888] tmp
+[1343622.288903] home
+[1343622.288919] var
+[1343622.288934] etc
+[1343622.288949] usr
+[1343627.582816] UNLOADED studio 15 module 
+
+lrwxrwxrwx   1 root root     7 Jan 27  2022 bin -> usr/bin
+drwxr-xr-x   4 root root  5120 Dec 31  1969 boot
+drwxr-xr-x  16 root root  3760 Mar 16 16:30 dev
+drwxr-xr-x 117 root root  4096 Feb  7 11:12 etc
+drwxr-xr-x   3 root root  4096 Jan 27  2022 home
+lrwxrwxrwx   1 root root     7 Jan 27  2022 lib -> usr/lib
+drwx------   2 root root 16384 Jan 27  2022 lost+found
+drwxr-xr-x   2 root root  4096 Jan 27  2022 media
+drwxr-xr-x   2 root root  4096 Jan 27  2022 mnt
+drwxr-xr-x   4 root root  4096 Jan 27  2022 opt
+dr-xr-xr-x 188 root root     0 Dec 31  1969 proc
+drwx------   5 root root  4096 Feb 24 15:41 root
+drwxr-xr-x  29 root root   840 Mar 23 10:41 run
+lrwxrwxrwx   1 root root     8 Jan 27  2022 sbin -> usr/sbin
+drwxr-xr-x   2 root root  4096 Jan 27  2022 srv
+dr-xr-xr-x  12 root root     0 Dec 31  1969 sys
+drwxrwxrwt   9 root root  4096 Mar 23 12:54 tmp
+drwxr-xr-x  11 root root  4096 Jan 27  2022 usr
+drwxr-xr-x  11 root root  4096 Jan 27  2022 var
+
+it greatly differs that's because the ones that aren't being printed are blank directories
+
+
+

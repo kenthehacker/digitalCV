@@ -1,0 +1,147 @@
+1.
+Kenichi Matsuo
+
+
+2.
+[ken.m@linuxlab006 studio16]$ ./user_program myFile hello world this is a file
+[ken.m@linuxlab006 studio16]$ cat myFile 
+hello
+world
+this
+is
+a
+file
+
+[ken.m@linuxlab006 studio16]$ ./user_program
+to run ./user_program, must pass in arguments
+
+
+3.
+[ken.m@linuxlab006 studio16]$ gcc user_prog_cpy.c -o user_prog_cpy
+[ken.m@linuxlab006 studio16]$ ./user_prog_cpy anotherFile this is my other file
+[ken.m@linuxlab006 studio16]$ ls
+anotherFile  myFile  studio16.txt  user_prog_cpy  user_prog_cpy.c  user_program  user_program.c
+[ken.m@linuxlab006 studio16]$ cat anotherFile 
+this
+is
+my
+other
+file
+
+#include <stdio.h>
+
+int main(int argc, char *argv[]){
+    FILE *file;
+    int arg_idx;
+
+    if (argc < 2){
+        printf("to run %s, must pass in arguments\n",argv[0]);
+        return -1;
+    }
+    file = fopen(argv[1],"w");
+    for(arg_idx = 2; arg_idx<argc; arg_idx++){
+        //fprintf(file, "%s\n", argv[arg_idx]);
+        fputs(argv[arg_idx],file);
+        fputs("\n",file);
+    }
+    fclose(file);
+    return 0;
+}
+
+
+4.
+[ken.m@linuxlab006 studio16]$ ./prog_3 third_file how do you do sir?
+[ken.m@linuxlab006 studio16]$ ls
+anotherFile  myFile  prog_3  prog_3.c  studio16.txt  third_file  user_prog_cpy  user_prog_cpy.c  user_program  user_program.c
+[ken.m@linuxlab006 studio16]$ cat third_file 
+how
+do
+you
+do
+sir?
+[ken.m@linuxlab006 studio16]$ 
+
+
+int main(int argc, char *argv[]){
+    int fd;
+    int arg_idx;
+
+    if (argc < 2){
+        printf("to run %s, must pass in arguments\n",argv[0]);
+        return -1;
+    }
+    fd = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    for(arg_idx = 2; arg_idx < argc; arg_idx++){
+        write(fd,argv[arg_idx],strlen(argv[arg_idx]));
+        write(fd,"\n",1);
+    }
+    close(fd);
+    return 0;
+}
+
+5.
+[ken.m@linuxlab006 studio16]$ cat a_text_file 
+I’m Bender, baby! Oh god, please insert liquor!
+[ken.m@linuxlab006 studio16]$ ./appender a_text_file How can I be so bad at everything I try and still be so great
+[ken.m@linuxlab006 studio16]$ cat a_text_file 
+I’m Bender, baby! Oh god, please insert liquor!
+How
+can
+I
+be
+so
+bad
+at
+everything
+I
+try
+and
+still
+be
+so
+great
+
+
+6.
+[ken.m@linuxlab006 studio16]$ cat a_text_file 
+I’m Bender, baby! Oh god, please insert liquor!
+How
+can
+I
+be
+so
+bad
+at
+everything
+I
+try
+and
+still
+be
+so
+great
+8 appender 
+2 v2 
+6 adding 
+7 strings 
+
+[ken.m@linuxlab006 studio16]$ touch random_text
+[ken.m@linuxlab006 studio16]$ ./appender_v2 random_text a abc abcdef
+[ken.m@linuxlab006 studio16]$ cat random_text 
+1 a 
+3 abc 
+6 abcdef 
+
+7.
+[ken.m@linuxlab006 studio16]$ ./lastOne random_text
+a
+abc
+abcdef
+[ken.m@linuxlab006 studio16]$ cat random_text 
+1 a 
+3 abc 
+6 abcdef 
+
+
+
+

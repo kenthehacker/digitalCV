@@ -1,0 +1,1 @@
+cmd_/project/scratch01/compile/ken.m/labs/more_os_labs/lab-2/mod/paging.mod := { echo  /project/scratch01/compile/ken.m/labs/more_os_labs/lab-2/mod/paging.o;  echo; } > /project/scratch01/compile/ken.m/labs/more_os_labs/lab-2/mod/paging.mod

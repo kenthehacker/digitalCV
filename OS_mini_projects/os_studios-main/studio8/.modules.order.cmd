@@ -1,0 +1,1 @@
+cmd_/project/scratch01/compile/ken.m/user_space/os_studios/studio8/modules.order := {   echo /project/scratch01/compile/ken.m/user_space/os_studios/studio8/spawn_k_threads.ko;   echo /project/scratch01/compile/ken.m/user_space/os_studios/studio8/atomic_kthread.ko; :; } | awk '!x[$$0]++' - > /project/scratch01/compile/ken.m/user_space/os_studios/studio8/modules.order

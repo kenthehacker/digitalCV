@@ -1,0 +1,115 @@
+1.
+Kenichi matsuo
+
+2.
+It just prints the number incrementing by 1 all the way to 50k, 
+if i hit cntrl c then the program terminates immediately
+i: 41606
+i: 41607
+i: 41608
+i: 41609
+i: 41610
+i: 41611
+i: 41612
+i: 41613
+i: 41614
+i: 41615
+^C
+
+
+3.
+now, whenever i do conrol c, itll interrupt but the program continues
+it'll mark the called[i] = 1 so that if on the i'th iteration i hit control c,
+itll mark the array so that after the loop ends, for every i'th iteration
+there was an interrupt, itll print where the interrupt occurred
+
+
+4.
+i: 499998
+i: 499999
+29808 was possibly interrupted
+47169 was possibly interrupted
+51451 was possibly interrupted
+54369 was possibly interrupted
+57587 was possibly interrupted
+60310 was possibly interrupted
+63914 was possibly interrupted
+68254 was possibly interrupted
+
+5.
+i: 24563
+i: 24564
+i: 24565
+i: 24566
+i: 24567
+i: 24568
+i: 24569
+^Ci: 24571
+24571 was possibly interrupted
+
+when i hit control c the program terminated and prints where it last left off
+
+6.
+before: 97717
+after: 97265
+
+i: 97715
+i: 97716
+i: 97717
+Caught SIGINT 
+7264
+i: 97265
+i: 97266
+
+there is a data corruption right here meaning there is a data race
+this is because the signal handler and the main() is running concurrently
+both the handler and the main() is accessing the called[] array causing this
+
+
+7.
+i: 101222
+Caught SIGINT
+i: 101223
+
+this worked fine, this is because write() is a sig-safe function
+
+8.
+this program runs indefinitely until SIGUSR2 occurs, until then it counts how many times 
+SIGUSR1 is invoked and once SIGUSR2 is invoked itll print the counter value 
+
+
+9.
+kenpi@kenpi:~/Desktop/studios/os_studios/studio20 $ ./receiver 
+pid: 7556
+SIGUSR1 received 8 times
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio20 $ ./sender 7556 100
+this pid: 7587
+
+this means that the receiver didnt count all of the SIGUSR1's this probably means
+that we're sending it too fast and the receiver isnt handling all of the signals 
+
+
+10.
+kenpi@kenpi:~/Desktop/studios/os_studios/studio20 $ ./receiver 
+pid: 12182
+SIGRTMIN received 250 times
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio20 $ ./sender 12182 250
+max sigs to send: 12868
+this pid: 12242
+
+
+11.
+kenpi@kenpi:~/Desktop/studios/os_studios/studio20 $ ./receiver 
+pid: 5910
+SIGRTMIN received 100 times
+
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio20 $ ./sender 5910 100
+max sigs to send: 12868
+this pid: 5949
+
+
+
+

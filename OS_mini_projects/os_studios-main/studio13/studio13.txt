@@ -1,0 +1,110 @@
+1. Kenichi Matsuo
+
+2.
+if they didn't then it would not make any sense logically. we attempt to access
+the memory with different layout then one structure could mis-read/interpret
+and write/read from the wrong areas of memory. by having the same layout we 
+standardise where to read and write memory to. we could also have race conditions
+we can just have a lock for the entire struct that i defined. if i need to have two
+processes running concurrently to access two different fields but we need the other
+to be unlocked this could lead to a deadlock
+
+
+3.
+if we're dealing with large arrays then memcpy can be faster than iterating through
+a large array. if we have a smaller array it does not matter, in fact it might be the same
+if the entire size of the array fits within the cache
+
+
+4.
+[ken.m@linuxlab006 studio13]$ ./leader 
+PRINTING LEADER VALUES 
+1086411056
+331503119
+716492090
+1499565922
+194168160
+1312589391
+113403363
+1431445066
+1899256311
+523984055
+[ken.m@linuxlab006 studio13]$ ./follower 
+PRINTING FOLLOWER ARRAY: 
+1086411056
+331503119
+716492090
+1499565922
+194168160
+1312589391
+113403363
+1431445066
+1899256311
+523984055
+
+we don't need ftruncate because we've already set the size of the shared memory with the leader program
+we got rid of O_CREAT because this only comes in play if there is a chance the memory object
+isn't created. we guarunteed that we've created the mem object by running follower.c first
+
+
+5.
+We avoid data races because we ensure that the follower cannot read until the write is fully completed
+by the leader, and deletion cannot proceed until the read is completed. We don't have deadlocks because
+the followr and the leader cannot run in true parallel, read and writes happen strictly one at a time by
+design. 
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio13 $ ./leader 
+PRINTING LEADER VALUES 
+5136076
+2091243229
+199579005
+912741699
+1654942611
+479910268
+224298343
+1899749413
+1677580122
+73478952
+
+kenpi@kenpi:~/Desktop/studios/os_studios/studio13 $ ./follower 
+PRINTING FOLLOWER ARRAY: 
+5136076
+2091243229
+199579005
+912741699
+1654942611
+479910268
+224298343
+1899749413
+1677580122
+73478952
+
+
+6.
+
+linux lab machine 2million:
+real	0m0.043s
+user	0m0.028s
+sys	0m0.006s
+4,000,000 bytes/0.043s = 93 petabytes a second
+
+
+linux lab machine 1million:
+real	0m0.040s
+user	0m0.009s
+sys	0m0.006s
+200 petabytes a second
+
+raspberry pi 1 million
+real	0m0.235s
+user	0m0.200s
+sys	0m0.020s
+17 petabytes / second
+
+raspberry pi 2 million
+
+real	0m0.471s
+user	0m0.409s
+sys	0m0.060s
+16.9 petabytes / second
+

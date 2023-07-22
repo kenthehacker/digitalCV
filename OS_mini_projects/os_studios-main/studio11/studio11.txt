@@ -1,0 +1,73 @@
+1)Kenichi Matsuo
+
+2)
+kenpi@kenpi:~/Desktop/studios/os_studios/studio11 $ time ./big_loop 1
+processor: 1
+
+real    0m9.355s
+user    0m8.451s
+sys     0m0.046s
+
+3)
+the DBUS daemon interrupted the process as well as kworker as well as sched_switch;
+i know this happened because the sched_switch interrupts the big_loop which then either the kworker or the DBUS daemon 
+occupied the 0th core.
+
+4)
+both sudo and non sudo runs at most 99 this is becausein the piazza post
+we hard set the max limit and i chose 99
+
+5)
+it was interrupted by lightdm 
+also when we compare it with the original dat file,
+i noticed that this one actually had a couple times
+where the CPU was in idle.
+Furthermore, the block of time which the process occupied
+the CPU was larger
+
+
+6)
+for CPU 0 there were 84 sched_switches
+for CPU 1: 830
+for CPU 2: 1426
+for CPU 3: 2906
+
+there were significantly less sched_switches for CPU 0
+
+7)
+the range went from 50 to 99, the things that had  priorities 
+included migration and kthreads
+i believe these had real time priority as the kernel
+needs to have real time priority in order to migrate
+certain tasks between different cores with accurate
+timing
+
+
+8)
+there were 81 sched_switches and the program was preempted
+by lightDM, this happened during the idle time
+early when the process was running; the kernel probably
+allocated this task to CPU 0 during this time slot since
+there was a considerable idle time slot
+
+
+9)
+
+the time slices were about 0.1 units of time apart or about 0.1 seconds
+each of the processes were running one after the other like in a round robin as 
+the name suggests. when i had the program run 3 different tasks it cycled between
+running the three different processes in a set time interval. i.e. if process A
+runs for 0.1 seconds process B would run right after and so on. 
+
+
+
+
+
+
+
+
+
+
+
+
+

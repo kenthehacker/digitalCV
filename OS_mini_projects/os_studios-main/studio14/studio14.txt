@@ -1,0 +1,198 @@
+1. Kenichi Matsuo
+
+2.
+this code takes command line arguments and assigns the iteration variable. 
+library_calls() runs iteration many times. inside of library_calls(), a float
+array is malloc'ed and returns an error if we can't allocate the float array.
+it then tries to find sqrt(383) inside of the array with bsearch() 
+then it frees the array. 
+
+3.
+[ken.m@linuxlab008 test_programs]$ ls -lh
+total 1.1M
+-rw-r--r-- 1 ken.m Domain Users 2.6K Mar 20 20:31 arr_search.c
+-rwxr-xr-x 1 ken.m Domain Users 8.4K Mar 20 20:49 arr_search_dynamic
+-rwxr-xr-x 1 ken.m Domain Users 1.0M Mar 20 20:49 arr_search_static
+-rw-r--r-- 1 ken.m Domain Users 1.9K Mar 20 20:31 dense_mm.c
+-rw-r--r-- 1 ken.m Domain Users  201 Mar 20 20:31 Makefile
+-rw-r--r-- 1 ken.m Domain Users 2.8K Mar 20 20:31 parallel_dense_mm.c
+-rw-r--r-- 1 ken.m Domain Users 1.1K Mar 20 20:31 sing.c
+-rw-r--r-- 1 ken.m Domain Users 3.0K Mar 20 20:31 sort.c
+
+the one statically linked is larger; this makes sense because all of the libraries used by this 
+program is now included as part of this executable, instead of fetching them from the 
+shared libraries
+
+4.
+./arr_search_dynamic completed 100000 iterations
+real	0m0.642s
+user	0m0.624s
+sys	    0m0.004s
+
+./arr_search_static completed 100000 iterations
+real	0m0.633s
+user	0m0.620s
+sys	    0m0.002s
+
+above, used 100000 iterations; real times posted above
+the run time is slightly different, dynamic program runs slightly slower
+
+
+./arr_search_static completed 500000 iterations
+real	0m2.455s
+user	0m2.454s
+sys	0m0.001s
+
+./arr_search_dynamic completed 500000 iterations
+real	0m2.440s
+user	0m2.426s
+sys	0m0.002s
+
+above, used 500000 iters; real times posted above
+run time is slightly different, dynamic program slower again
+
+
+
+5.
+[ken.m@linuxlab008 test_programs]$ ldd arr_search_static
+	not a dynamic executable
+[ken.m@linuxlab008 test_programs]$ ldd arr_search_dynamic
+	linux-vdso.so.1 =>  (0x00007fff22712000)
+	libm.so.6 => /lib64/libm.so.6 (0x00002b850194a000)
+	libc.so.6 => /lib64/libc.so.6 (0x00002b8501c4c000)
+	/lib64/ld-linux-x86-64.so.2 (0x00002b8501726000)
+
+the first one didnt return anything while the second one returned an output 
+this is because the dynamically linked executable depends on libraries
+such as linux-vdso.so.1 while the static one already has these
+in the executable so it returned nothing
+
+6.
+the result for the dynamically linked executable is much shorter this makes sense
+since it's showing all of the symbols inside of the executable; the static 
+file is going to have more than the dynamic since the dynamically linked one
+will fetch them at run time 
+
+[ken.m@linuxlab008 test_programs]$ nm arr_search_dynamic | wc
+     39     107    1371
+[ken.m@linuxlab008 test_programs]$ nm arr_search_static | wc
+   1887    5661   65010
+
+
+
+7.
+readelf provides a more in-depth view about the binary created. it shows
+us the memory layout; when we want to know information regarding mem location
+and offset or size, this is useful but if we want to get a quick scan then NM is more useful
+
+
+8.
+9504:   ./arr_search_dynamic_cpy 1
+0000000000400000      4K r-x-- arr_search_dynamic_cpy
+0000000000600000      4K r---- arr_search_dynamic_cpy
+0000000000601000      4K rw--- arr_search_dynamic_cpy
+0000000000ded000    132K rw---   [ anon ]
+00002ae0f2bbf000    136K r-x-- ld-2.17.so
+00002ae0f2be1000     12K rw---   [ anon ]
+00002ae0f2c19000     12K rw---   [ anon ]
+00002ae0f2de0000      4K r---- ld-2.17.so
+00002ae0f2de1000      4K rw--- ld-2.17.so
+00002ae0f2de2000      4K rw---   [ anon ]
+00002ae0f2de3000   1028K r-x-- libm-2.17.so
+00002ae0f2ee4000   2044K ----- libm-2.17.so
+00002ae0f30e3000      4K r---- libm-2.17.so
+00002ae0f30e4000      4K rw--- libm-2.17.so
+00002ae0f30e5000   1808K r-x-- libc-2.17.so
+00002ae0f32a9000   2044K ----- libc-2.17.so
+00002ae0f34a8000     16K r---- libc-2.17.so
+00002ae0f34ac000      8K rw--- libc-2.17.so
+00002ae0f34ae000     20K rw---   [ anon ]
+00007ffd1a583000    136K rw---   [ stack ]
+00007ffd1a5c4000      8K r-x--   [ anon ]
+ffffffffff600000      4K r-x--   [ anon ]
+ total             7440K
+
+
+
+9.
+GNU gdb (GDB) Red Hat Enterprise Linux 7.6.1-120.el7
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-redhat-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /project/scratch01/compiling/ken.m/user_space/os_studios/studio14/test_programs/arr_search_debugging...done.
+(gdb) q
+
+
+it gave us the debugger, in here we can give the GDB debugger commands such as break points 
+and have the program run line by line
+
+10.
+(gdb) b library_calls
+Breakpoint 1 at 0x400770: file arr_search.c, line 45.
+(gdb) r 2
+Starting program: /project/scratch01/compiling/ken.m/user_space/os_studios/studio14/test_programs/./arr_search_debugging 2
+
+Breakpoint 1, library_calls () at arr_search.c:45
+45	    values = (float *) malloc(ARR_SIZE * sizeof(float));
+
+11.
+it advanced again, and hitting the same exact line because there were more iterations to complate
+Continuing.
+
+Breakpoint 1, library_calls () at arr_search.c:45
+45	    values = (float *) malloc(ARR_SIZE * sizeof(float));
+
+
+12.
+(gdb) n
+46	    if(!values) return -1;
+(gdb) p values
+$1 = (float *) 0x602010
+
+13.
+$1 = (float *) 0x602010
+(gdb) watch *(float *) 0x602010
+Hardware watchpoint 2: *(float *) 0x602010
+(gdb) watch *(float *) (values + 1)
+Hardware watchpoint 3: *(float *) (values + 1)
+(gdb) c
+Continuing.
+Hardware watchpoint 2: *(float *) 0x602010
+
+Old value = 0
+New value = 1
+library_calls () at arr_search.c:49
+49	    for (i=0; i<ARR_SIZE; i++) {
+(gdb) c
+Continuing.
+Hardware watchpoint 3: *(float *) (values + 1)
+
+Old value = 0
+New value = 1.41421354
+library_calls () at arr_search.c:49
+49	    for (i=0; i<ARR_SIZE; i++) {
+(gdb) c
+Continuing.
+Hardware watchpoint 3: *(float *) (values + 1)
+
+Old value = 1.41421354
+New value = 0
+__memset_sse2 () at ../sysdeps/x86_64/memset.S:84
+84		andq	$-64, %rcx
+(gdb) c
+Continuing.
+
+Watchpoint 3 deleted because the program has left the block in
+which its expression is valid.
+main (argc=2, argv=0x7fffffffcdd8) at arr_search.c:88
+88	        if (library_calls()) return -1;          
+
+
+as each iteration proceeds the value that we're watching is displayed, we see
+what the value was previously and what the value is then updated to.
+

@@ -1,0 +1,93 @@
+1.
+Kenichi Matsuo
+
+2.
+[ken.m@linuxlab002 studio17]$ ./pipe 
+Parent recieved folowing message(s)
+hello, im the child 
+Anything less than immortality is a complete waste of time 
+Bite my shiny metal ass
+
+3.
+on one terminal i ran the following:
+[ken.m@shell studio17]$ ./fifo 
+Reading from fifo: 
+kill all humans
+[ken.m@shell studio17]$ 
+
+
+on the second i ran the following:
+[ken.m@shell studio17]$ echo "kill all humans" > bender
+
+to accomplish this, i defined my path:
+#define FIFO_NAME "bender"
+
+when the following executes, it waits until it reads something
+printf("Reading from fifo: \n");
+while(fgets(buff,sizeof(buff),file)){
+    printf("%s",buff);
+}
+
+so it's quite clear its working fine
+
+4.
+snippet:
+got 988 doubled: 1976
+got 990 doubled: 1980
+got 992 doubled: 1984
+got 994 doubled: 1988
+got 996 doubled: 1992
+got 998 doubled: 1996
+got 1000 doubled: 2000
+got 1002 doubled: 2004
+got 1004 doubled: 2008
+got 1006 doubled: 2012
+got 1008 doubled: 2016
+got 1010 doubled: 2020
+got 1012 doubled: 2024
+got 1014 doubled: 2028
+got 1016 doubled: 2032
+got 1018 doubled: 2036
+got 1020 doubled: 2040
+got 1022 doubled: 2044
+got 1024 doubled: 2048
+got 1 doubled: 2
+got 3 doubled: 6
+got 5 doubled: 10
+got 7 doubled: 14
+got 9 doubled: 18
+got 11 doubled: 22
+got 13 doubled: 26
+
+
+the even ran first then the odd and even.c and odd.c terminatd after writing buf_size amounts of things
+i dont have a read corruption or data race
+
+
+
+5.
+this was the output:
+Reading from fifo: 
+got 1 doubled: 2
+got 2 doubled: 4
+got 3 doubled: 6
+got 4 doubled: 8
+got 5 doubled: 10
+got 43 doubled: 86
+got 23 doubled: 46
+got 45 doubled: 90
+got 43 doubled: 86
+got 23 doubled: 46
+got 56 doubled: 112
+got 3 doubled: 6
+got 54 doubled: 108
+got 2 doubled: 4
+got 345 doubled: 690
+got 6 doubled: 12
+got 543 doubled: 1086
+got 23 doubled: 46
+got 45 doubled: 90
+
+these are indeed the correct inputs and outputs so i think its running correctly
+
+
