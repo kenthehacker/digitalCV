@@ -1,5 +1,9 @@
-I'm Kenichi Matsuo and a rising senior at Washington University in St. Louis.
-This is a collection of the past projects that I have been working on and some are still a work in progress
-any sites relying on AWS might not necessarily work as the servers might be on pause; but the code is posted
+I am a recent grad at Washington University in Saint Louis. Please check out my LinkedIn
+for my up to date information
 
-I'm currently working on a small RL project to self-teach myself core concepts
+My curiosity has grown in computer science even after I graduated and I continue to learn
+through these projects. I am just about finished with my CNN deep Q learning project.
+I plan on learning more about machine learning
+
+After having completed my dqn project, I do plan on taking a break and explore a peculiar 
+side of computer science just for a tad "bit" dealing with entanglements...
