@@ -3,6 +3,7 @@ Howdie! chase_food is from following a sent dex tutorial where I learned about q
 Now I've moved onto learning about DQN. I've invested a bit of time reading relevant parts of Sutton's textbook
 The idea is to use convolutional NN with q learning to train a snake. Before finishing that part,
 I've also uploaded my code where I've trained snake using a regular linear NN where the state is represented by a head-relative array
+I'm just doing this project to kinda get an introductory understanding of rl 
 
 ## How We Represent The State
 - We can either have the N x N grid itself be a state where we assign values
@@ -38,7 +39,7 @@ million iterations for the CNN
 I believe it's because the NN does not know which direction we're going when we submit the n x n grid as the input
 The Volodymyr Mnih 2013 Atari paper mentioned that they fed k=3-4 states into the NN which indirectly encodes direction.
 I've also been constantly been using 1 input channel and the Atari paper uses 4 input channels. Perhaps using greyscale isn't sufficient
-
+But instead of feeding multiple states I'll be feeding 1 state but change the colour of the head thereby encoding direction
 
 
 
