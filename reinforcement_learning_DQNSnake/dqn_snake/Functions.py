@@ -6,8 +6,12 @@ def get_squared_distance(a,b):
 def get_cnn_state(snake_body, food):
     grid = [[0] * game.game_size for _ in range(game.game_size)]
     for body in snake_body:
-        grid[body.x][body.y] = 1
-    grid[food.x][food.y] = 2
+        if body.is_out_of_bounds() == False:
+            grid[body.x][body.y] = 1
+    head = snake_body[-1]
+    if head.is_out_of_bounds() == False:
+        grid[head.x][head.y] = 2
+    grid[food.x][food.y] = 3
     return grid
 
 def get_reward(snake_body, food, old_location):
