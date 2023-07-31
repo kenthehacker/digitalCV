@@ -13,22 +13,22 @@ import os
 from collections import deque
 
 tick_rate = 10
-epsilon_decay_rate = 0.9999999
+epsilon_decay_rate = 0.999992 
 epsilon_min = 0.01
-epsilon = 0.4
+epsilon = 0.9970613219777701
 original_epsilon = epsilon
 temp_decay = 2.5*original_epsilon/game.num_episodes
 input_size = 16
-game_size = 20 #bigger because less dimensionality compared to cnn 
+game_size = game.game_size 
 
-def decay_epsilon(epsilon, epsilon_min, epsilon_decay_rate):
-    epsilon = max(epsilon_min, epsilon * epsilon_decay_rate)
-    return max(epsilon, epsilon_min)
+def decay_epsilon(epsilon, epsilon_decay_rate, epsilon_min):
+    return max(epsilon_min, epsilon * epsilon_decay_rate)
+    #return max(epsilon, epsilon_min)
 
 discount_rate = 0.99
 model = dqn.Stacked_CNN(input_size)
 target_model = dqn.Stacked_CNN(input_size)
-model_path = "CNN_model_params.pth"
+model_path = "conv_model_params.pth"
 
 if os.path.exists(model_path):
     model.load_state_dict(torch.load(model_path))
@@ -55,6 +55,8 @@ def choose_action(state_stack):
     if np.random.rand() < epsilon:
         return np.random.randint(1,4)
     state_stack_tensor = torch.tensor(state_stack, dtype=torch.float32).unsqueeze(0)
+    #print("PRINTING TENSOR")
+    #print(model(state_stack_tensor))
     return torch.argmax(model(state_stack_tensor))
 
 def take_action(action, snake_bodies, food):
@@ -65,6 +67,8 @@ def take_action(action, snake_bodies, food):
         snake_bodies.append(new_head)
         return True
     tail = snake_bodies.pop(0)
+    #print("TAIL" + str(tail))
+    #print(f"NEW LOCATION {new_location} {action}")
     tail.x,tail.y = new_location
     snake_bodies.append(tail)
     return False
@@ -102,9 +106,11 @@ try:
         
         for iter in range(game.iters_per_ep):    
             old_state = get_cnn_state(snake_bodies, food)
+            old_state_stack = np.array(frame_deque)
             old_head_location = snake_bodies[-1].get_coord()
-            action = choose_action(old_state)
-                    
+            #action = choose_action(old_state)
+            action = choose_action(old_state_stack)
+
             ate_apple = take_action(action, snake_bodies, food)
             
             if iter%target_update_rate == 0: #target model update 
@@ -127,12 +133,13 @@ try:
 
             new_state = get_cnn_state(snake_bodies, food)
             frame_deque.append(new_state)
+            new_state_stack = np.array(frame_deque)
             episode_reward += iter_reward
 
             #experience_replay.push(old_state,action,new_state,iter_reward)
             experience_replay.push(np.array(frame_deque), action, np.array(frame_deque), iter_reward)
             optimizer.zero_grad()
-            
+
             if (len(experience_replay) > experience_replay_batch_size):
                 exp_state,exp_action,exp_reward,exp_next_state = experience_replay.get_batched_state_act_reward_nextState(experience_replay_batch_size)
                 exp_old_q_value = model(exp_state).gather(1, exp_action.unsqueeze(-1)).squeeze(-1) 
@@ -140,18 +147,19 @@ try:
                 exp_predicted_q_value = exp_reward + (discount_rate * exp_max_new_q_value)
                 loss = loss_fn(exp_old_q_value, exp_predicted_q_value)
             else:
-                old_state_tensor = torch.tensor(np.array(old_state)).unsqueeze(0).unsqueeze(0).float()
-                new_state_tensor = torch.tensor(np.array(new_state)).unsqueeze(0).unsqueeze(0).float()
-
-                old_q_value = model(old_state_tensor)
+                old_state_tensor = torch.tensor(old_state_stack, dtype=torch.float32).unsqueeze(0)
+                new_state_tensor = torch.tensor(new_state_stack, dtype=torch.float32).unsqueeze(0)
+                # print(f"old_state_tensor shape: {old_state_tensor.shape}")
+                # print(f"new_state_tensor shape: {new_state_tensor.shape}")
+                old_q_value = model(old_state_tensor)[0, action].unsqueeze(0)
                 max_new_q_value = target_model(new_state_tensor).max().item()
 
                 if (episode%1000 == 0):
                     print("EPISODE: "+str(episode)+" ITERATION: "+str(iter))
-                    print(model(old_state_tensor))
+                    #print(model(old_state_tensor))
                     print("EPSILON: "+str(epsilon))
                     print("rewards: "+str(reward_list[-10:]))
-                
+
                 predicted_q_value = torch.tensor([iter_reward + discount_rate * max_new_q_value], device=old_q_value.device)
                 loss = loss_fn(old_q_value, predicted_q_value)
 
@@ -174,6 +182,8 @@ try:
 
             if iter_reward == game.death_penalty:
                 break
+        if episode%50 == 0:
+            print(f"Episode reward: {episode_reward}")
         if episode%display_rate == 0:
             pygame.quit()
         if training:

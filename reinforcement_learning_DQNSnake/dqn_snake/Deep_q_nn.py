@@ -100,13 +100,13 @@ class CNN_DQN_V4(nn.Module):
         return x
 class Stacked_CNN(nn.Module):
     def __init__(self, game_dimension):
-        super(CNN_DQN_V3, self).__init__()
+        super(Stacked_CNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.relu1 = nn.ReLU()
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.relu2 = nn.ReLU()
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(6400, 512)
+        self.fc1 = nn.Linear(14400, 512)
         self.relu3 = nn.ReLU()
         self.fc2 = nn.Linear(512, 4) 
     def forward(self, x):
@@ -206,14 +206,23 @@ class Multi_Step_Exp_Replay:
     def sample(self, batch_size):
         return random.sample(self.memory, batch_size)
 
+    # def get_batched_state_act_reward_nextState(self, batch_size):
+    #     data = self.sample(batch_size)
+    #     state, action, next_state, reward = zip(*data) #transpose our data
+    #     state = torch.tensor(state, dtype=torch.float)
+    #     action = torch.tensor(action, dtype=torch.long)
+    #     reward = torch.tensor(reward, dtype=torch.float)
+    #     next_state = torch.tensor(next_state, dtype=torch.float)
+    #     return state, action, reward, next_state
     def get_batched_state_act_reward_nextState(self, batch_size):
         data = self.sample(batch_size)
-        state, action, next_state, reward = zip(*data) #transpose our data
-        state = torch.tensor(state, dtype=torch.float)
+        state, action, next_state, reward = zip(*data)
+        state = torch.tensor(np.array(state), dtype=torch.float) #time improvement 
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
+        next_state = torch.tensor(np.array(next_state), dtype=torch.float) #time improvement
         return state, action, reward, next_state
+
 
     def __len__(self):
         return len(self.memory)

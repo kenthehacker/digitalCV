@@ -1,4 +1,4 @@
-game_size = 10
+game_size = 15
 pixel_size = 20
 green=(0,255,0)
 blue = (0,0,255)
