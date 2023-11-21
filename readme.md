@@ -1,9 +1,11 @@
+# Howdie!
 I am a recent grad at Washington University in Saint Louis. Please check out my LinkedIn
-for my up to date information
+for my up to date information!
 
 My curiosity has grown in computer science even after I graduated and I continue to learn
-through these projects. I am just about finished with my CNN deep Q learning project.
-I plan on learning more about machine learning
+through these projects. 
 
-After having completed my dqn project, I do plan on taking a break and explore a peculiar 
-side of computer science just for a tad "bit" dealing with entanglements...
+I've posted some of the projects I've done. My most recent project I completed was writing a DQN snake game
+I ran into lots of bumps and relied on the Atari paper and discovered I must use target NN and a repplay buffer
+
+Right now, I am learning FPGA development on the lattice Nandland Go board programmed in Verilog
