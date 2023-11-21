@@ -1,3 +1,7 @@
+# Overview
+In C, to dynamically allocate memory we have to call "malloc()"
+This project was to implement my own version of malloc
+
 #############################
 # CS:APP Malloc Lab
 # Handout files for students
