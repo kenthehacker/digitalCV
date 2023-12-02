@@ -20,7 +20,7 @@ module Debounce_Top(
     wire w_debounced_switch;
     Debounce_Filter #(.DEBOUNCE_LIMIT(250000)) filter_inst (
         .i_Clk(i_Clk),
-        .i_Switch_1(i_Switch_1)
+        .i_Switch_1(i_Switch_1),
         .o_Debounced(w_debounced_switch)
     );
 
