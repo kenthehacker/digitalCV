@@ -1,11 +1,11 @@
 ### Led Selection table
 i_Switch_2  i_Switch_1  Which LED?
-~~~
+```
 0      |    0    |      1
 0      |    1    |      2
 1      |    0    |      3
 1      |    1    |      4
-~~~
+```
 ### Timing
 Clock runs at 25 MHz we want LED to blink at 2HZ
 25MHz = 25,000,000 clock cycles per second. We can count clock cycle or use LFSR to delay 
