@@ -16,14 +16,14 @@ module FIFO #(parameter WIDTH = 8, parameter LEVEL = 4)
 );
     parameter DEPTH = 128; //128 bits deep fifo
     reg [WIDTH-1:0] fifo[0:DEPTH-1];
-    reg [9:0] count; //number of storage locations/depth of the fifo being tracked here
+    reg [$clog2(DEPTH)+1:0] count; //number of storage locations/depth of the fifo being tracked here
     //read & write ptrs
-    reg [LEVEL-1:0] rd_ptr;
-    reg [LEVEL-1:0] wr_ptr;
+    reg [$clog2(DEPTH):0] rd_ptr;
+    reg [$clog2(DEPTH):0] wr_ptr;
 
     //write
     always @(posedge i_Wr_Clk)begin
-        if (i_Wr_DV && o_Full && ~i_Rd_En)begin
+        if (i_Wr_DV && !o_Full && ~i_Rd_En)begin
             fifo[wr_ptr] <= i_Wr_Data;
             wr_ptr<= (wr_ptr == DEPTH-1)? 0 : wr_ptr+1;
             if (!o_Full)count<=count+1;
@@ -32,10 +32,10 @@ module FIFO #(parameter WIDTH = 8, parameter LEVEL = 4)
 
     //read
     always @(posedge i_Rd_Clk) begin
-        if (i_Rd_En && ~i_Write_DV && !o_Empty)begin 
+        if (i_Rd_En && ~i_Wr_DV && !o_Empty)begin 
             o_Rd_Data <= fifo[rd_ptr];
             rd_ptr <= (rd_ptr==DEPTH-1) ? 0 : rd_ptr+1;
-            if (!o_Empty) count<= count+1;
+            if (!o_Empty) count<= count-1;
         end 
     end 
 
